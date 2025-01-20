@@ -1,0 +1,33 @@
+---
+title: "biostat620_p1"
+format: html
+editor: visual
+---
+
+## Quarto
+
+
+
+## Running Code
+```{r}
+a <- 1
+b <- -1
+c <- -2
+discriminant <- b^2 - 4*a*c
+if (discriminant < 0) {
+  print("no real solutions")
+} else {
+  solutions <- c((-b + sqrt(discriminant)) / (2 * a), (-b - sqrt(discriminant)) / (2 * a))
+  print(solutions)
+}
+```
+
+## Drawing Graphics
+
+```{r}
+x <- seq(-5, 5, length = 100)
+y <- a * x^2 + b * x + c
+plot(x, y, type = "l", main = "Graph of f(x)", xlab = "x", ylab = "f(x)")
+lines(x, y)
+```
+

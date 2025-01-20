@@ -1,0 +1,87 @@
+---
+title: "biostat620_p1"
+format: html
+editor: visual
+---
+
+## Quarto
+
+
+
+## Running Code
+```{r}
+a <- 1
+b <- -1
+c <- -2
+discriminant <- b^2 - 4*a*c
+if (discriminant < 0) {
+  print("no real solutions")
+} else {
+  solutions <- c((-b + sqrt(discriminant)) / (2 * a), (-b - sqrt(discriminant)) / (2 * a))
+  print(solutions)
+}
+```
+
+## Drawing Graphics
+
+```{r}
+x <- seq(-5, 5, length = 100)
+y <- a * x^2 + b * x + c
+plot(x, y, type = "l", main = "Graph of f(x)", xlab = "x", ylab = "f(x)")
+lines(x, y)
+```
+
+
+```{r}
+coefs <- scan("data/coefs1.txt", what = numeric())
+a <- coefs[1]
+b <- coefs[2]
+c <- coefs[3]
+discriminant <- b^2 - 4 * a * c
+if (discriminant < 0) {
+  print("no real solutions")
+} else {
+  solutions <- c((-b + sqrt(discriminant)) / (2 * a), (-b - sqrt(discriminant)) / (2 * a))
+  print(solutions)
+}
+```
+
+
+```{r}
+solve_quadratic <- function(a, b, c) {
+  discriminant <- b^2 - 4 * a * c
+  
+  if (discriminant > 0) {
+    root1 <- (-b + sqrt(discriminant)) / (2 * a)
+    root2 <- (-b - sqrt(discriminant)) / (2 * a)
+    return(c(root1, root2))
+  } else if (discriminant == 0) {
+    root <- -b / (2 * a)
+    return(root)
+  } else {
+    return("no real solutions")
+  }
+}
+
+input_files <- c("../data/coefs1.txt", "../data/coefs2.txt", "../data/coefs3.txt")
+output_files <- c("../results/results1.txt", "../results/results2.txt", "../results/results3.txt")
+
+dir.create("../results", showWarnings = FALSE)
+
+for (i in seq_along(input_files)) {
+
+  coefs <- scan(input_files[i], what = numeric())
+  a <- coefs[1]
+  b <- coefs[2]
+  c <- coefs[3]
+  
+  solutions <- solve_quadratic(a, b, c)
+  cat("Solutions for", input_files[i], ":", solutions, "\n")
+  
+  if (is.character(solutions)) {
+    write(solutions, file = output_files[i])
+  } else {
+    write(solutions, file = output_files[i], ncolumns = length(solutions))
+  }
+}
+```
