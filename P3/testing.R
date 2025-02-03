@@ -86,7 +86,6 @@ population_clean <- population_clean %>%
 population_clean <- population_clean %>%
   mutate(state_name = sapply(state_name, as.character))  
 
-# 检查修复后的数据
 head(population_clean)
 
 
@@ -173,4 +172,70 @@ cases_raw <- request(api) |>
 # Print first few rows to check data
 head(cases_raw)
 
+
+# 11.
+# Load required libraries
+library(httr2)
+library(jsonlite)
+library(dplyr)
+library(lubridate)
+
+# Define API endpoint with an increased limit
+api <- "https://data.cdc.gov/resource/pwn4-m3yp.json?$limit=10000000000"
+
+# Send GET request and retrieve response
+cases_raw <- request(api) |> 
+  req_perform() |> 
+  resp_body_json(simplifyVector = TRUE) |> 
+  as_tibble()
+
+# Print column names to confirm available data
+print(colnames(cases_raw))
+
+# Ensure correct column names
+cases_cleaned <- cases_raw |> 
+  select(state, end_date, new_cases) |>  # Use `new_cases` instead of `new_case`
+  rename(date = end_date, cases = new_cases) |> 
+  mutate(
+    cases = as.numeric(cases),  # Convert cases to numeric
+    date = as.Date(date)        # Convert date to Date format (ISO-8601)
+  )
+
+# Print first few rows to verify
+head(cases_cleaned)
+
+
+
+# 12.
+library(ggplot2)
+library(dplyr)
+
+
+cases_normalized <- cases_cleaned %>%
+  left_join(population_with_region, by = c("state" = "state_abbr")) %>%
+  mutate(
+    cases_per_100k = (cases / POP_2021) * 100000
+  )
+
+
+cases_filtered <- cases_normalized %>%
+  filter(!is.na(cases_per_100k)) %>%
+  filter(format(date, "%Y") %in% c("2020", "2021"))
+
+
+ggplot(cases_filtered, aes(x = date, y = cases_per_100k, group = state)) +
+  geom_line(alpha = 0.2) +  
+  facet_wrap(~ region_name, scales = "free_y") +  
+  labs(
+    title = "COVID-19 Cases per 100,000 Population (2020-2021)",
+    x = "Date",
+    y = "Cases per 100,000",
+    caption = "Data Source: CDC"
+  ) +
+  theme_minimal() +  
+  theme(
+    strip.text = element_text(size = 10, face = "bold"),  
+    axis.text.x = element_text(angle = 45, hjust = 1)  
+  ) +
+  geom_smooth(se = FALSE, color = "blue", alpha = 0.3)  
 
