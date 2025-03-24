@@ -1,0 +1,121 @@
+---
+title: Problem set 8
+date: 2025-03-25
+execute: 
+  eval: true
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(error = TRUE)
+```
+You are not allowed to load any package or use for-loop. For exercises 1 and 3-6 you only get to write one line of code for the solution.
+
+For better preparation for midterm, we recommend not using chatGPT for this homework.
+
+1. Create a 100 by 10 matrix of randomly generated standard normal numbers. Put the result in `x`. Show the subset of `x` defined by the first 5 rows and the first 4 columns.
+
+```{r}
+set.seed(2025); x <- matrix(rnorm(1000), 100, 10); x[1:5, 1:4]
+```
+
+2. Apply the three R functions that give you the dimension of `x`, the number of rows of `x`, and the number of columns of `x`, respectively. Print the responses.
+
+```{r}
+cat("dim:", dim(x), "\nnrow:", nrow(x), "\nncol:", ncol(x), "\n")
+```
+
+3. Generate matrix `y` obtained from adding the scalar 1 to row 1, the scalar 2 to row 2, and so on, to the matrix `x`. Show the subset of `y` defined by the first 5 rows and the first 4 columns.
+
+```{r}
+y <- x + 1:100; y[1:5, 1:4]
+```
+
+4. Generate matrix `z` obtained from adding the scalar 2 to column 1, the scalar 4 to column 2, and so on, to the matrix `y`. Hint: Use `sweep` with `FUN = "+"`. Show the subset of `z` defined by the first 5 rows and the first 4 columns.
+
+```{r}
+z <- sweep(y, 2, 2*(1:10), FUN = "+"); z[1:5, 1:4]
+```
+
+5. Compute the average of each row of `z`. Show the first 10 elements
+
+```{r}
+(rowMeans(z))[1:10]
+```
+
+6. Use matrix multiplication to compute the average of each column of `z` and store in a single row matrix. Hint define a $1\times n$ matrix $(1/n, \dots, 1/n)$ with $n$ the `nrow(z)`. Show the first 10 elements
+
+```{r}
+(matrix(rep(1/nrow(z), nrow(z)), nrow = 1) %*% z)[1, 1:10]
+```
+
+7. Use matrix multiplication and other matrix / vector operations to compute the standard deviation of each column of z. Do not use `sweep` or `apply`. Print the results. For this exercise, you must only use the following operations: `t, -, %*%, *, /,` and `as.vector`
+
+```{r}
+as.vector(sqrt(colSums((z - matrix(rep(1, nrow(z)), ncol = 1) %*% (matrix(rep(1/nrow(z), nrow(z)), nrow = 1) %*% z))^2) / (nrow(z) - 1)))
+
+```
+
+8. For each digit in the MNIST training data, compute and print the overall proportion of pixels that are in a *grey area*, defined as values between 50 and 205, inclusive. Hint: use the `read_mnist` function from the `dslabs` package.
+
+```{r}
+library(dslabs)
+mnist <- read_mnist()
+
+is_gray <- mnist$train$images >= 50 & mnist$train$images <= 205
+
+gray_prop_overall <- sapply(0:9, function(d) {
+  images_d <- mnist$train$images[mnist$train$labels == d, ]
+  total_pixels <- length(images_d)
+  gray_pixels <- sum(images_d >= 50 & images_d <= 205)
+  gray_pixels / total_pixels
+})
+
+gray_prop_overall
+```
+
+9. Compute and print the average grey proportion by digit class. Hint: Use logical operators and `sapply`.
+
+```{r}
+is_gray <- mnist$train$images >= 50 & mnist$train$images <= 205
+gray_per_image <- rowMeans(is_gray)
+
+gray_avg_by_digit <- sapply(0:9, function(d) {
+  mean(gray_per_image[mnist$train$labels == d])
+})
+
+gray_avg_by_digit
+```
+
+10. Make a box plot of grey proportion by digit class. Each point on the boxplot should represent one training image. Hint: Use logical operators and `rowMeans`.
+
+```{r}
+gray_prop_per_image <- rowMeans(mnist$train$images >= 50 & mnist$train$images <= 205)
+
+labels <- mnist$train$labels
+
+boxplot(gray_prop_per_image ~ labels,
+        main = "Grey Pixel Proportion per Image by Digit Class",
+        xlab = "Digit",
+        ylab = "Grey Pixel Proportion (50–205)",
+        col = "lightgray")
+
+```
+
+11. Use the function `solve` to solve the following system of equations. Hint: use the function `solve`. Show the solution.
+
+\begin{align}
+x + 2y - 2z &= -15 \\
+2x + y - 5z &= -21 \\
+x - 4y + z &= 18
+\end{align}
+
+
+```{r}
+A <- matrix(c(1, 2, -2,
+              2, 1, -5,
+              1, -4, 1), nrow = 3, byrow = TRUE)
+
+b <- c(-15, -21, 18)
+solution <- solve(A, b)
+cat("x =", solution[1], "\ny =", solution[2], "\nz =", solution[3])
+
+```
