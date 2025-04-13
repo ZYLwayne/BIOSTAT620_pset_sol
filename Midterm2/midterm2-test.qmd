@@ -1,0 +1,512 @@
+---
+title: Midterm 2
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+## Some properties and equations
+
+-   If $X$ and $Y$ are random variables and $a$ is a non-random
+    constant:
+
+    -   $\mbox{E}[aX]= a\mbox{E}[X]$
+
+    -   $\mbox{E}[X + Y] = \mbox{E}[X] + \mbox{E}[Y]$
+
+    -   $\mbox{SE}[X] = \sqrt{\mbox{Var}[X]}$
+
+    -   $\mbox{SE}[aX] = a\mbox{SE}[X]$
+
+    -   **If** $X$ and $Y$ are independent,
+        $\mbox{Var}[X + Y] = \mbox{Var}[X] + \mbox{Var}[Y]$
+
+-   You have $n$ observations $(x_1, y_1), \dots (x_N,y_N)$ where each
+    pair is a realization of variables $X$ and $Y$.
+
+    -   Notation reminder: $\bar{y}$ and $\bar{x}$ are the sample
+        averages, $s_Y$ and $s_X$ are the sample standard deviations,
+        and $r$ the sample correlation.
+
+    -   Sample correlation is defined as
+
+$$
+r = \frac{1}{N-1}\sum_{i=1}^N
+\left(\frac{x_i - \bar{x}}{s_x}\right)
+\left(\frac{y_i - \bar{y}}{s_y}\right)
+$$
+
+-   The regression line for predicting $Y$ given $X=x$ is
+
+$$
+\frac{\hat{Y} - \bar{y}}{s_Y} =  r\frac{x - \bar{x}}{s_X}
+$$
+
+-   To construct a matrix `x` with `n` rows and `m` columns you can use
+    the function `x <- matrix(y, n, m)` with `y` a vector of length
+    `n*m`.
+
+1.  You have modified two files called `wrangle.R` and `code.R` and want
+    to save the changes to your Git repository and push the changes to a
+    remote repository named `origin` on the `main` branch. Assume that
+    your `git` has the upstream branch set to `origin` with `main`. What
+    sequence of Git commands should you run?
+
+<!-- -->
+
+A)  
+
+```         
+git commit -m "Updated code"
+git add .
+git push 
+```
+
+B)  
+
+```         
+git add code.R wrangle.R
+git commit "Updated code"
+git pull 
+```
+
+C)  
+
+```         
+git commit -m "Updated code"
+git push 
+git add code.R wrangle.R
+```
+
+D)  
+
+```         
+git add code.R wrangle.R
+git commit -m "Updated code"
+git push 
+```
+
+E)  
+
+```         
+file_list <- c('code.R', 'wrangle.R')
+for(file in file_list) {
+  git commit file
+}
+```
+
+F)  
+
+```         
+git add code.R wrangle.R
+git commit "Updated code"
+git push
+```
+
+2.  A data frame `dat` includes incomes for 100,000 randomly chosen
+    individuals. These are uniformly distributed across 10 states. The
+    column names are `id`, `income`, `state` for the individual ID,
+    income value, and state name, respectively. Which of the following
+    lines of code generate a separate histogram summarizing the income
+    distribution for each state.
+
+<!-- -->
+
+A.  
+
+```         
+dat |> ggplot(aes(state, income)) + geom_histogram() 
+```
+
+B.  
+
+```         
+dat |> ggplot(aes(income)) + geom_histogram() + facet_wrap(~state)
+```
+
+C.  
+
+```         
+dat |> ggplot(aes(income, color = state)) + geom_hist() 
+```
+
+D.  
+
+```         
+for(i in 1:10){
+    dat |> filter(state == i) |> ggplot(aes(income)) + geom_histogram() 
+}
+```
+
+E.  
+
+```         
+dat |> geom_histogram(x = income, by = state)
+```
+
+F.  
+
+```         
+dat |> ggplot(aes(income, state)) + geom_histogram() 
+```
+
+For questions 3-5 we will use a six sided die to define a random
+variable. Define $X$ to be 1 if you toss a six, and 0 if you toss a one,
+two, three, four, or five. I toss the die $n=3,600$ times to generate
+$X_1,\dots,X_n$ and define $S = \sum_{i=1}^n X_i$.
+
+3.  what is $\mbox{E}[S]$? You can use Monte Carlo to check your answer,
+    But please provide an exact answer. Hint: answer is a positive
+    integer.
+
+```{r}
+set.seed(2025)
+n <- 3600
+B <- 10000
+S <- replicate(B, sum(sample(c(0,1), size = n, replace = TRUE, prob = c(5/6, 1/6))))
+mean(S)
+
+```
+
+4.  What is the standard deviation of $S$ divided by $\sqrt{5}$? You can
+    use Monte Carlo to check your answer, but please provide an exact
+    answer. Hint: answer is a positive integer.
+
+$\textrm{sd}(S)/\sqrt{5}= [X]$
+
+```{r}
+set.seed(1)
+n <- 3600
+sim_s <- replicate(10000, {
+  rolls <- sample(1:6, n, replace = TRUE)
+  sum(rolls == 6)
+})
+sd(sim_s) / sqrt(5)
+
+```
+
+5.  Which is closest to the probability $\mbox{Pr}(S \geq 640)$
+
+-   A. 0.00
+-   B. 0.025
+-   C. 0.04
+-   D. 0.05
+-   E. 0.10
+-   F. 0.11
+-   G. 0.17
+-   H. 0.5
+-   I. 0.83
+
+```{r}
+set.seed(1)
+n <- 3600
+sim_s <- replicate(100000, sum(sample(1:6, n, replace = TRUE) == 6))
+mean(sim_s >= 640)
+
+```
+
+6.  You have height and weight data and fit a regression line to predict
+    weight from height. The sample correlation is 0.4 and the slope of
+    the regression line is 0.1 kilograms per centimeter. Now you change
+    the heights from centimeters to meters and recompute the correlation
+    and regression line slope.
+
+What is the correlation? \[X\]
+
+What is the slope of the regression line? \[Y\] kilograms per meter.
+Enter the number only without units.
+
+For exercises 7-9, read the following file into a data frame called
+`galton_heights`: `galton_heights.csv`. The file includes heights for
+fathers, sons, and daughters for 300 families. The `father` column
+provides the father heights, the `child` column provides the offspring
+heights, and `gender` is `female` for daughters and `male` for sons.
+
+7.  Report the sample correlation between fathers and daughter heights
+    and the sample correlation between fathers and son heights. Round to
+    the nearest hundredth (e.g. 0.28). Find:
+
+Sample correlation between fathers and daughter \[X\] Sample correlation
+between fathers and sons \[Y\]s
+
+```{r}
+
+galton_heights <- read.csv("galton_heights.csv")
+
+cor_father_daughter <- cor(
+  galton_heights$father[galton_heights$gender == "female"],
+  galton_heights$child[galton_heights$gender == "female"]
+)
+
+cor_father_son <- cor(
+  galton_heights$father[galton_heights$gender == "male"],
+  galton_heights$child[galton_heights$gender == "male"]
+)
+
+cat("Sample correlation (father-daughter):", round(cor_father_daughter, 2), "\n")
+cat("Sample correlation (father-son):", round(cor_father_son, 2), "\n")
+
+```
+
+8.  In question 7, we notice that the correlation is higher for sons
+    than daughters. Given what we discussed in class and the data in
+    hand, which of the following statements about humans are correct?
+    Select all that apply.
+
+A. Males inherit more genes from their fathers so it makes sense that
+the correlation is stronger.
+
+B. The standard deviation for height is larger for daughters, which
+brings the correlation down.
+
+C. The standard deviation for height is smaller for daughters, which
+brings the correlation down.
+
+D. The data provides a sample of 300 pairs, so the difference can be
+explained by random variation.
+
+E. Sons are of similar average height as fathers and thus the
+correlation is higher.
+
+F. The analysis is biased because some daughters and sons are from the
+same family, but we did not take this correlation into account.
+
+9.  Fit the following simple linear regression model. Fit a separate
+    model for sons as well as daughters:
+
+$$
+Y_i = \beta_0 + \beta_1 x_i + \varepsilon_i
+$$
+
+with $Y_i$ the child's height and $x_i$ the father's height. Generate a
+95% confidence interval using central limit theorem for the slope
+coefficient $\beta_1$. Hint use the `tidy` function in the **broom**
+package after fitting the model with `lm`.
+
+Which of the following statements do these two (one for sons and one for
+daughters) confidence intervals support? Select all that apply:
+
+A. 0.5 is in both confidence intervals.
+
+B. The two confidence intervals overlap.
+
+C. 0.3 is in both confidence intervals.
+
+D. The standard error for both estimates of $\beta_1$ are larger than
+0.07
+
+E. The ratio of $\beta_1$ to the sample correlation in question 7 is
+smaller for females.
+
+```{r}
+library(dplyr)
+library(broom)
+
+fit_daughters <- galton_heights %>%
+  filter(gender == "female") %>%
+  lm(child ~ father, data = .)
+
+
+fit_sons <- galton_heights %>%
+  filter(gender == "male") %>%
+  lm(child ~ father, data = .)
+
+
+result_daughters <- tidy(fit_daughters, conf.int = TRUE)
+result_sons <- tidy(fit_sons, conf.int = TRUE)
+
+
+result_daughters[result_daughters$term == "father", ]
+result_sons[result_sons$term == "father", ]
+
+```
+
+10. Fit the following two models for $Y =$ body_weight to the
+    `mice_weights` data in the **dslabs** package.
+
+Model 1:
+
+$$
+Y_i = \beta_0 + \beta_1 x_i + \varepsilon_i
+$$ with $x_i=1$ if mouse $i$ is on a high fat diet and 0 otherwise and
+the $\varepsilon$'s independent errors with
+$\text{var}(\epsilon) = \sigma^2$.
+
+Model 2:
+
+$$
+Y_i = \beta_0 + \beta_1 x_i + \beta_2 z_i + \varepsilon_i
+$$ with $x_i=1$ if mouse $i$ is on a high fat diet and 0 otherwise,
+$z_i=1$ if mouse $i$ is a male and 0 otherwise, and the $\varepsilon$'s
+independent errors with $\text{var}(\epsilon) = \sigma^2$.
+
+Which of the following statements is true about the two estimates of
+$\sigma$ you obtain when fitting these models with function `lm` (Hint:
+if `fit` is the result of using `lm` you can use `summary(fit)$sigma` to
+see the estimate of $\sigma$.)
+
+A. The $\sigma$ estimates are different. When we include the sex
+covariate in the model the $\sigma$ estimate is higher than in the model
+without the sex covariate because the sex covariate adds variation.
+
+B. The $\sigma$ estimates are different. When we include the sex
+covariate in the model the $\sigma$ estimate is smaller than in the
+model without the sex covariate because the sex covariate explains some
+of the observed variation.
+
+C. The $\sigma$ estimates are the same because they are represented by
+the same greek letter.
+
+D. The $\sigma$ estimates are the same. When we include the sex
+covariate in the model, the $\sigma$ estimate remains the same as in the
+model without the sex covariate. This is because the diet covariate
+explains all of the variation.
+
+E. The $\sigma$ estimates are the same because the noise is a fixed
+property of the data, which is independent of the model we choose.
+
+F. We cannot fit model 2 because it is too complex and the parameter
+estimates are not identifiable. We need to add constraints.
+
+```{r}
+library(dslabs)
+data(mice_weights)
+
+fit1 <- lm(body_weight ~ diet, data = mice_weights)
+
+
+fit2 <- lm(body_weight ~ diet + sex, data = mice_weights)
+
+summary(fit1)$sigma
+summary(fit2)$sigma
+```
+
+11. Predict the expected body_weight for a male mouse on the high fat
+    diet for Model 1 \[A\] and Model 2 \[B\]. Round each to the nearest
+    integer.
+
+```{r}
+
+predict(fit1, newdata = data.frame(diet = "hf")) |> round()
+
+predict(fit2, newdata = data.frame(diet = "hf", sex = "M")) |> round()
+
+```
+
+12. Which of the following does not center the columns of a matrix `x`
+    so that `mean(x[,i])=0` for any `i`. Hint: if you are not sure
+    construct a matrix and try out each command.
+
+A. `sweep(x, 2, colMeans(x))`
+
+B. `t(t(x)-colMeans(x))`
+
+C. `for(i in 1:ncol(x)) x[,i] <- x[,i] - mean(x[,i])`
+
+D. `z <- t(x); x <- t(z - rowMeans(z))`
+
+E. `x - colMeans(x)`
+
+```{r}
+set.seed(1)
+x <- matrix(rnorm(20), 5, 4)
+
+centered <- x - colMeans(x)
+colMeans(centered)
+
+```
+
+13. Define $\Phi(z)$ as the probability that a random variable $Z$ that
+    follows a standard normal distribution (mean 0 and standard
+    deviation 1) is smaller than $z$: $\Phi(z) = \mbox{Pr}(Z \leq z)$.
+
+In R the function $\Phi(z)$ is provided by `pnorm(z)`. Define a new
+random variable as $X = \Phi(Z)$. Use a Monte Carlo simulation or
+mathematical derivations to determine which of the following is true:
+
+Hint: Use data visualization to guide your answer.
+
+A. $X$ follows a normal distribution with mean 0.5 and standard
+deviation 0.29.
+
+B. $X$ follows a normal distribution with mean 0 and standard devitaion
+1.
+
+C. $X$ follows a normal distribution with mean $\Phi(0)$ and standard
+deviation $\Phi(1)$.
+
+D. $X$ follows a uniform distribution with range 0 to 1:
+$Pr(X \leq a) = a, \mbox{for } a \in (0,1)$.
+
+E. $X$ follows a constant distribution.
+
+F. $X$ follows a Bernoulli distribution.
+
+```{r}
+set.seed(1)
+Z <- rnorm(100000)
+X <- pnorm(Z)
+
+hist(X, breaks = 50, col = "lightblue", main = "Histogram of X = pnorm(Z)")
+
+```
+
+14. As part of an experiment you take three measurements. You correctly
+    assume that these are independent observations from a random
+    variable $Y$ that has standard error $\sigma$. We denote your three
+    observations as $y_1, y_2, y_3$.
+
+You explain to your boss that the average $\bar{Y}$ of three
+measurements has standard error $\sigma/\sqrt{3}$. Your boss is not
+happy with this level of precision and wants the standard error to be
+smaller. Your boss suggests increase the size of your dataset by
+literally making three exact copies of your observations, creating your
+new dataset as follows:
+
+$$(z_1, z_2, z_3, z_4, z_5, z_6,z_7,z_8,z_9) = (y_1, y_1, y_1, y_2, y_2, y_2, y_3, y_3, y_3)$$
+
+Your boss tells you to use the formula you learned in your data science
+class that says the average $\bar{Z} = \frac{1}{9}\sum_{i=1}^9 Z_i$ has
+standard error $\sigma/\sqrt{9} = \sigma/3$.
+
+You notice that
+
+$$\bar{Z} =  \frac{1}{9}\sum_{i=1}^9 z_i = \frac{1}{9}\times 3\times\sum_{i=1}^3 y_i = \frac{1}{3}\sum_{i=1}^3 y_i = \bar{Y}$$
+
+which is your original average!
+
+Which of the following is true about your new average $\bar{Z}$? Select
+all that apply.
+
+A. Given how $Z$ is defined, $\bar{Z}$ has standard error
+$\sigma/\sqrt{3}$.
+
+B. The standard error of $\bar{Z}$ is $\sigma/\sqrt{9}$.
+
+C. The real standard error of $\bar{Z}$ is somewhere between
+$\sigma/\sqrt{3}$ and $\sigma/\sqrt{9}$.
+
+D. It makes sense that the standard error of $\bar{Z}$ is smaller when
+we add more variables because we have a better estimate of the standard
+error.
+
+E. We can't compute the standard error of of $\bar{Z}$ because our
+assumptions don't permit us to compute the correlation between the nine
+variables.
+
+15: You are using a smoothing method to find the trend of body weight
+over time for a patient. However, your fitted smooth trend is still
+jagged and rough around the edges. What can you do to improve the
+smoothness of your fitted curve? Select all that apply.
+
+A. Use a more smooth kernel for smoothing. Instead of the box kernel,
+use the Gaussian kernel.
+
+B. Increase the width of your smoothing kernel.
+
+C. Correct for the class imbalance problem.
+
+D. Consider adding in a method for outlier removal in the data.
+
+E. Most smoothing algorithm assume global linearity of the data.
+Switching to a nonlinear method could fix issue of lack of smoothness.
